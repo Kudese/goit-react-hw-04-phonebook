@@ -1,7 +1,8 @@
-import { Component } from 'react';
-import Contacts from './Contacts/Contacts';
+import {  useState } from 'react';
+import { useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import PhoneBook from './PhoneBook/PhoneBook';
+import Contacts from './Contacts/Contacts';
 
 const BaseContact = [
   {
@@ -13,13 +14,13 @@ const BaseContact = [
   { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
   { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
 ];
-export default class App extends Component {
-  state = {
-    contacts: [],
-  };
-  checkList = e => {
+
+export const App = () => {
+  const [contacts, setContact] = useState(JSON.parse(localStorage.getItem('contacts')) ?? BaseContact);
+
+  const checkList = e => {
     const name = e.target.name.value;
-    const contacts = this.state.contacts;
+
     let inListContact;
     contacts.forEach(el => {
       if (el.name === name) {
@@ -29,52 +30,41 @@ export default class App extends Component {
 
     return inListContact;
   };
-  handleDeleteContact = id => {
-    this.setState(prevState => {
-      const newContactsList = prevState.contacts.filter(contact => {
+  const handleDeleteContact = id => {
+    setContact(() => {
+      const newContactsList = contacts.filter(contact => {
         return contact.id !== id;
       });
 
-      return { contacts: newContactsList };
+      return  newContactsList ;
     });
   };
-  handleCreateContact = e => {
+  const handleCreateContact = e => {
     const name = e.target.name.value;
     const number = e.target.number.value;
-    if (this.checkList(e)) {
+    if (checkList(e)) {
       alert(`${name} is already in contact`);
     } else {
-      this.setState(({ contacts: prevContacts }) => ({
-        contacts: [
-          ...prevContacts,
-          {
-            id: nanoid(),
-            name: name,
-            number: number,
-          },
-        ],
-      }));
+      setContact(prev => [
+        ...prev,
+        {
+          id: nanoid(),
+          name: name,
+          number: number,
+        },
+      ]);
     }
   };
-  componentDidMount() {
-    const contacts = JSON.parse(localStorage.getItem("contacts"))|| BaseContact
-    this.setState({contacts})
-  }
-  componentDidUpdate(_, prevState){
-   
-    if(prevState.contacts.length !== this.state.contacts.length){
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts))
-    }
-  }
-  render() {
-    return (
-      <>
-        <PhoneBook onCreateContact={this.handleCreateContact} />
-        <Contacts
-          onDeleteContact={this.handleDeleteContact}
-          contacts={this.state.contacts}
-        />
-      </>
-    );
-  }
-}
+    useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+
+  return (
+    <>
+      <PhoneBook onCreateContact={handleCreateContact} />
+      <Contacts onDeleteContact={handleDeleteContact} contacts={contacts} />
+    </>
+  );
+};
+

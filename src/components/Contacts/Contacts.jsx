@@ -1,42 +1,38 @@
-import { Component } from 'react';
 import s from '../Contacts/Contacts.module.css';
 import ContactFiler from './ContactFilter/ContactFilter';
 import ContactIteam from './ContactIteam/ContacIteam';
 import PropTypes from 'prop-types';
-export default class Contacts extends Component {
-  state = {
-    filter: '',
-  };
-  handleFiletrContacts = e => {
-    const searh = e.target.value;
+import { useState } from 'react';
 
-    this.setState({ filter: searh });
+export default function Contacts({ contacts, onDeleteContact }) {
+  const [filter, setFilter] = useState('');
+
+  const handleFiletrContacts = e => {
+    const searh = e.target.value;
+    setFilter(searh);
   };
-  render() {
-    let list = this.props.contacts.filter(el =>
-      el.name.toLowerCase().includes(this.state.filter.toLowerCase())
-    );
-    return (
-      <div className={s.conteiner}>
-        <h2>Contacts</h2>
-        <ContactFiler
-          filter={this.state.filter}
-          onFilterContacts={this.handleFiletrContacts}
-        />
-        <ul>
-          {list.map(el => {
-            return (
-              <ContactIteam key={el.id}
-                onDeleteContact={this.props.onDeleteContact}
-                contact={el}
-              />
-            );
-          })}
-        </ul>
-      </div>
-    );
-  }
+  const list = contacts.filter(el =>
+    el.name.toLowerCase().includes(filter.toLowerCase())
+  );
+  return (
+    <div className={s.conteiner}>
+      <h2>Contacts</h2>
+      <ContactFiler filter={filter} onFilterContacts={handleFiletrContacts} />
+      <ul>
+        {list.map(el => {
+          return (
+            <ContactIteam
+              key={el.id}
+              onDeleteContact={onDeleteContact}
+              contact={el}
+            />
+          );
+        })}
+      </ul>
+    </div>
+  );
 }
+
 Contacts.propTypes = {
   contacts: PropTypes.arrayOf(
     PropTypes.shape({
